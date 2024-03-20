@@ -1,4 +1,5 @@
 local utils = require("utils")
+local Entitiy = require("entity")
 local inspect = require("inspect").inspect
 -- TODO: create system menager / decied how sysetem will be created
 -- NOTE: maybe adding system would look something like this
@@ -8,6 +9,8 @@ local inspect = require("inspect").inspect
 --          with = { "a", "b", "c" },
 --          without = { "d" }
 --       } returns error|nil
+--
+-- TODO: accesing components is  annoying make function take only components of entities
 
 ---@enum QueryType
 local _ = {
@@ -93,26 +96,53 @@ return {
 			end
 			self.systems[type][name] = nil
 			return {
-				    system.fn,
-				    name = name,
-				    with = system.with,
-				    without = system.without,
-				    type = type,
-			    },
-			    nil
+				system.fn,
+				name = name,
+				with = system.with,
+				without = system.without,
+				type = type,
+			},
+				nil
+		end
+
+		---@class World
+		---@field dispatch_system function
+		---@param system Query
+		function World:dispatch_system(system)
+			local entities = self:query(system)
+			for key, value in pairs(entities) do
+				entities[key] = value:strip()
+			end
+			local mutated = system.fn(entities)
+			for key, value in pairs(mutated) do
+				mutated[key] = Entitiy.dress(value)
+			end
+			for k, mut in ipairs(mutated) do
+				self.entities[k] = mut
+			end
 		end
 
 		---@class World
 		---@field startup function
 		function World:startup()
-			--print(inspect(self.entities))
-			for key, system in pairs(self.systems.startup) do
-				print("runnig startup system:  " .. key)
-				local entities = self:query(system)
-				local mutated = system.fn(entities)
-				for k, mut in pairs(mutated) do
-					self.entities[k] = mut
-				end
+			for _, system in pairs(self.systems.startup) do
+				self:dispatch_system(system)
+			end
+		end
+
+		---@class World
+		---@field update function
+		function World:update()
+			for _, system in pairs(self.systems.startup) do
+				self:dispatch_system(system)
+			end
+		end
+
+		---@class World
+		---@field draw function
+		function World:draw()
+			for _, system in pairs(self.systems.startup) do
+				self:dispatch_system(system)
 			end
 		end
 

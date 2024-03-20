@@ -1,5 +1,6 @@
 local inspect = require("inspect").inspect
 local utils = require("utils")
+local Entity = require("entity")
 ---@class Systems
 ---@field startup Query[]
 ---@field update Query[]
@@ -24,6 +25,33 @@ local World = {
 		last_id = 0,
 	},
 }
+World.mt = {
+	__tostring = function(self)
+		return inspect(self)
+	end,
+}
+
+function World:new()
+	local t = {
+		entities = {},
+		systems = {
+			startup = {},
+			update = {},
+			draw = {},
+		},
+		metadata = {
+			last_id = 0,
+		},
+	}
+
+	for key, value in pairs(self) do
+		if type(value) == "function" then
+			t[key] = value
+		end
+	end
+	setmetatable(t, self.mt)
+	return t
+end
 
 --- takes entity and ands it to world returnig its id
 ---@param entity Entity
@@ -31,13 +59,7 @@ local World = {
 function World:spawn(entity)
 	local new_id = self.metadata.last_id + 1
 	local formated_id = "Entity" .. tostring(new_id)
-	local e = {
-		components = entity,
-		metadata = {
-			changed = false,
-		},
-	}
-	self.entities[formated_id] = e
+	self.entities[formated_id] = Entity:new(entity)
 	self.metadata.last_id = new_id
 	return formated_id
 end
@@ -45,7 +67,7 @@ end
 ---@param id number
 ---@return Entity?
 function World:get_by_id(id)
-	return World.entities[id]
+	return self.entities[id]
 end
 
 function World:remove_entity(id)

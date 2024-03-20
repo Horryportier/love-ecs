@@ -8,12 +8,13 @@ function S.tableEquals(table1, table2)
 	--print("table2:\n" .. inspect(table2))
 	-- Check if both are tables
 	if type(table1) ~= "table" or type(table2) ~= "table" then
-		return false, string.format("table1_type(%s) ~= table2_type(%s)", type(table1), type(table2))
+		return false,
+			{ string.format("table1_type(%s) ~= table2_type(%s)", type(table1), type(table2)), table1, table2 }
 	end
 
 	-- Check if they have the same length
 	if #table1 ~= #table2 then
-		return false, string.format("table1_size(%d) ~= table2_size(%d)", #table1, #table2)
+		return false, { string.format("table1_size(%d) ~= table2_size(%d)", #table1, #table2), table1, table2 }
 	end
 
 	-- Check each element
@@ -23,12 +24,16 @@ function S.tableEquals(table1, table2)
 		else
 			if table2[key] ~= value then
 				return false,
-					string.format(
-						"key(%s) table1_value(%s) ~= table2_value(%s)",
-						key,
-						inspect(table2[key]) .. type(table2[key]),
-						inspect(value) .. type(value)
-					)
+					{
+						string.format(
+							"key(%s) table1_value(%s) ~= table2_value(%s)",
+							key,
+							inspect(table2[key]) .. type(table2[key]),
+							inspect(value) .. type(value)
+						),
+						table1,
+						table2,
+					}
 			end
 		end
 	end
