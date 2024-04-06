@@ -25,8 +25,18 @@ local entity_functions = {
 	end,
 }
 
-function entitiylib.new_entity(t)
-	t = add_functions(t, entity_functions)
+--- Creates Entity from components and generates mask
+--- Don't use this use World:spawn()
+---@param id number
+---@param components any[]
+---@param component_registry table
+---@return Entity
+function entitiylib.new_entity(id, components, component_registry)
+	---@type Entity
+	local t = add_functions({}, entity_functions)
+	t.components = components
+	t.mask = masklib.generate_mask(components, component_registry)
+	t.id = id
 	return setmetatable(t, entity_meta)
 end
 

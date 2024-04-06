@@ -3,9 +3,7 @@ local ecslib = {
 	entity = require("src.entity.entity"),
 }
 
----
 ---Gets the current running version of LÖVE-ECS.
----
 ---
 ---@return number major
 ---@return number minor
