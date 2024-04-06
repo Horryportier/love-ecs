@@ -1,2 +1,2 @@
 test:
-	lua test.lua
+	echo test.lua | entr lua test.lua
