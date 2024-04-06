@@ -1,3 +1,5 @@
+-- TODO:
+-- DOCS/TYPES
 local Ecs = require("ecs")
 
 local inspect = require("inspect").inspect
@@ -20,6 +22,7 @@ local function random_cilcle()
 end
 
 function love.load()
+	love.window.setTitle("LUA-ECS")
 	print("love version:", love.getVersion())
 	print("love-ecs version:", Ecs.getVersion())
 
@@ -33,26 +36,33 @@ function love.load()
 	})
 	print(inspect(World))
 
-	for _ = 1, 10, 1 do
+	for _ = 1, 100, 1 do
 		World:spawn(random_cilcle())
 	end
-
-	World.systems.draw = {
-		draw_shape = {
-			mask = 26,
-			---@param world World
-			---@param ids number[]
-			fn = function(world, ids)
-				for _, value in pairs(ids) do
-					local e = world.entities[value].components
-					local r, g, b, a = love.graphics.getColor()
-					love.graphics.setColor(unpack(e.color))
-					love.graphics.circle(e.shape.mode, e.position.x, e.position.y, e.shape.radius)
-					love.graphics.setColor(r, g, b, a)
-				end
-			end,
-		},
+	local shape_components = {
+		position = true,
+		color = true,
+		shape = true,
 	}
+
+	World:add_system("draw_shape", "draw", shape_components, function(world, ids)
+		for _, value in pairs(ids) do
+			local e = world.entities[value].components
+			local r, g, b, a = love.graphics.getColor()
+			love.graphics.setColor(unpack(e.color))
+			love.graphics.circle(e.shape.mode, e.position.x, e.position.y, e.shape.radius)
+			love.graphics.setColor(r, g, b, a)
+		end
+	end)
+	World:add_system("move_shapes", "update", { shape = true, position = true }, function(world, ids, dt)
+		for _, value in pairs(ids) do
+			local old_pos = world.entities[value].components.position
+			world.entities[value].components.position = {
+				x = old_pos.x + math.random(-1, 1),
+				y = old_pos.y + math.random(-1, 1),
+			}
+		end
+	end)
 end
 
 function love.update(dt)
