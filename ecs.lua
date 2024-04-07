@@ -1,10 +1,10 @@
 local ecslib = {
 	world = require("src.world.world"),
 	entity = require("src.entity.entity"),
+	shape = require("src.shape.shape"),
 }
 
 ---Gets the current running version of LÖVE-ECS.
----
 ---@return number major
 ---@return number minor
 ---@return number revision

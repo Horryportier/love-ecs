@@ -2,6 +2,8 @@ package.path = package.path .. ";../?.lua"
 -- TODO:
 -- DOCS/TYPES
 local Ecs = require("ecs")
+local circle = require("ecs").shape.circle
+local rect = require("ecs").shape.rect
 
 local inspect = require("inspect").inspect
 
@@ -9,10 +11,7 @@ local function random_cilcle()
 	math.randomseed(os.clock())
 	return {
 		position = { x = math.random(100, 600), y = math.random(100, 500) },
-		shape = {
-			radius = math.random(10, 40),
-			mode = math.random(1, 2) == 2 and "fill" or "line",
-		},
+		shape = math.random(1, 2) == 2 and circle.new("line", 40) or rect.new("line", 20, 40),
 	}
 end
 
@@ -57,7 +56,7 @@ function love.load()
 			if e.color then
 				love.graphics.setColor(unpack(e.color))
 			end
-			love.graphics.circle(e.shape.mode, e.position.x, e.position.y, e.shape.radius)
+			e.shape:draw(e.position.x, e.position.y)
 			if e.color then
 				love.graphics.setColor(r, g, b, a)
 			end
