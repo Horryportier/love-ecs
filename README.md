@@ -8,6 +8,8 @@
 - queries - can quarry for entites with and without components
 ----------
 # Usage
+
+SEE: [example/minimal](https://github.com/Horryportier/love-ecs/blob/main/examples/minimal/main.lua)
 ----------
 # Current Issues
 Queries use one 64 bitmask for speed meaning there can only be as mutch commponents 64 integer can hold.
