@@ -13,7 +13,16 @@ local system_type = require("src.system.system").system_type
 ---@field components_registry table
 ---@field systems Systems
 ---@field query fun(self: World, mask: Mask)
+---@field spawn fun(self: World, components: table)
+---@field register_types fun(self: World, list: string[])
+---@field add_system fun(self: World, name: string, type: SystemType, with: any[], without: any[], fn: fun(world: World, ids: number[]))
+---@overload fun(self: World, name: string, type: SystemType, with: any[], without: any[], fn: fun(world: World, ids: number[], dt: number))
+---@field draw  fun(self: World)
+---@field load fun(self: World)
+---@field update fun(self: World, dt: number)
 
+---@class worldlib
+---@field new_world fun(): World
 local worldlib = {}
 
 local world_meta = {
@@ -26,7 +35,6 @@ local world_meta = {
 }
 
 --- Registers types assing them to components_registry
---- max size for now is 64
 ---@param self World
 ---@param list string[]
 local function register_types(self, list)
@@ -53,15 +61,17 @@ local function query(self, mask)
 	return ids
 end
 
+--- adds system to world pass SystemType ("load"|"draw"|"update") to specify what system is it 
+--- ERROR: when with and without queries have conflicting types
 ---@param self World
 ---@param name string
----@param type SysetemType
+---@param type SystemType
 ---@param with any[]
 ---@param without any[]
 ---@param fn fun(world: World, ids: number[])
+---@overload fun(self: World, name: string, type: SystemType, with: any[], without: any[], fn: fun(world: World, ids: number[], dt: number))
 local function add_system(self, name, type, with, without, fn)
 	local system = new_system(with, without, fn, self.components_registry)
-	print(inspect(system))
 	if type == system_type.load then
 		self.systems.load[name] = system
 	end
@@ -79,10 +89,10 @@ local function draw(self)
 		system.fn(self, ids)
 	end
 end
-local function update(self)
+local function update(self, dt)
 	for _, system in pairs(self.systems.update) do
 		local ids = self:query(system.mask)
-		system.fn(self, ids)
+		system.fn(self, ids, dt)
 	end
 end
 

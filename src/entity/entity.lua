@@ -3,7 +3,7 @@ local add_functions = require("src.common").add_functions
 
 ---@class Entity
 ---@field id number
----@field components any[]
+---@field components table
 ---@field mask number
 
 local entitiylib = {}

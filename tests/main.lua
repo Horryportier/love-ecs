@@ -39,19 +39,18 @@ function love.load()
 		"position",
 		"shape",
 	})
-	print(inspect(World))
+	print(inspect(World.components_registry))
 
-	for _ = 1, 100, 1 do
+	for _ = 1, 1000, 1 do
 		local circle = random_cilcle()
 		circle = math.random(1, 2) == 1 and with_color(circle) or circle
 		World:spawn(circle)
 	end
-	local shape_components = {
+
+	World:add_system("draw_shape", "draw", {
 		position = true,
 		shape = true,
-	}
-
-	World:add_system("draw_shape", "draw", shape_components, {}, function(world, ids)
+	}, {}, function(world, ids)
 		for _, value in pairs(ids) do
 			local e = world.entities[value].components
 			local r, g, b, a = love.graphics.getColor()
@@ -69,16 +68,19 @@ function love.load()
 		"update",
 		{ shape = true, position = true },
 		{ color = true },
-		function(world, ids, _)
+		function(world, ids, dt)
 			for _, value in pairs(ids) do
 				local old_pos = world.entities[value].components.position
 				world.entities[value].components.position = {
-					x = old_pos.x + math.random(-1, 1),
-					y = old_pos.y + math.random(-1, 1),
+					x = old_pos.x + math.random(-10, 10) * dt,
+					y = old_pos.y + math.random(-10, 10) * dt,
 				}
 			end
 		end
 	)
+	World:add_system("print_info", "draw", {}, {}, function(_, _)
+		love.graphics.print(love.timer.getFPS())
+	end)
 end
 
 function love.update(dt)
