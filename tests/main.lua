@@ -40,7 +40,7 @@ function love.load()
 	})
 	print(inspect(World.components_registry))
 
-	for _ = 1, 1000, 1 do
+	for _ = 1, 100, 1 do
 		local circle = random_cilcle()
 		circle = math.random(1, 2) == 1 and with_color(circle) or circle
 		World:spawn(circle)
@@ -77,8 +77,9 @@ function love.load()
 			end
 		end
 	)
-	World:add_system("print_info", "draw", {}, {}, function(_, _)
-		love.graphics.print(love.timer.getFPS())
+	World:add_system("print_info", "draw", {}, {}, function(world, _)
+		love.graphics.print(tostring(love.timer.getFPS()))
+		love.graphics.print("number of entities: " .. tostring(#world.entities), 0, 20)
 	end)
 end
 
