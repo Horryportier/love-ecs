@@ -43,10 +43,12 @@ end
 
 ---@param self World
 ---@param components table
+---@return Entity
 local function spawn(self, components)
 	local new_id = self.last_id + 1
 	self.entities[new_id] = new_entity(new_id, components, self.components_registry)
 	self.last_id = new_id
+	return self.entities[new_id]
 end
 ---@param self World
 ---@param mask Mask
@@ -54,6 +56,9 @@ end
 local function query(self, mask)
 	local ids = {}
 	for id, value in pairs(self.entities) do
+		if value.mutated then
+			value:update_mask(self.components_registry)
+		end
 		if contains(mask.with, value.mask) and dont_contain(mask.without, value.mask) then
 			table.insert(ids, id)
 		end
@@ -61,7 +66,7 @@ local function query(self, mask)
 	return ids
 end
 
---- adds system to world pass SystemType ("load"|"draw"|"update") to specify what system is it 
+--- adds system to world pass SystemType ("load"|"draw"|"update") to specify what system is it
 --- ERROR: when with and without queries have conflicting types
 ---@param self World
 ---@param name string

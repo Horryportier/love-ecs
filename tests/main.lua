@@ -43,10 +43,10 @@ function love.load()
 	for _ = 1, 100, 1 do
 		local circle = random_cilcle()
 		circle = math.random(1, 2) == 1 and with_color(circle) or circle
-		World:spawn(circle)
+		World:spawn(circle).components.color = nil
 	end
 
-	World:add_system("draw_shape", "draw", {
+	World:add_system("1draw_shape", "draw", {
 		position = true,
 		shape = true,
 	}, {}, function(world, ids)
@@ -77,9 +77,29 @@ function love.load()
 			end
 		end
 	)
-	World:add_system("print_info", "draw", {}, {}, function(world, _)
+	World:add_system("0print_info", "draw", {}, {}, function(world, _)
 		love.graphics.print(tostring(love.timer.getFPS()))
 		love.graphics.print("number of entities: " .. tostring(#world.entities), 0, 20)
+		for index, value in ipairs(world.entities) do
+			love.graphics.print("number of entities: " .. tostring(value), 0, 20 + (index * 10))
+		end
+	end)
+
+	World:add_system("romove_color", "update", { color = true }, {}, function(world, ids)
+		for _, value in pairs(ids) do
+			if love.keyboard.isDown("r") then
+				world.entities[value]:remove("color")
+				print(value)
+			end
+		end
+	end)
+	World:add_system("add_color", "update", { shape = true }, { color = true }, function(world, ids)
+		for _, value in pairs(ids) do
+			if love.keyboard.isDown("c") then
+				world.entities[value]:insert({ color = with_color({}).color })
+				print(value)
+			end
+		end
 	end)
 end
 
