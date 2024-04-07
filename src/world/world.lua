@@ -1,6 +1,7 @@
 local inspect = require("inspect").inspect
 local generate_registry = require("src.mask").generate_registry
 local contains = require("src.mask").contains
+local dont_contain = require("src.mask").dont_contain
 local add_functions = require("src.common").add_functions
 local new_entity = require("src.entity.entity").new_entity
 local new_system = require("src.system.system").new_system
@@ -11,7 +12,7 @@ local system_type = require("src.system.system").system_type
 ---@field entities Entity[]
 ---@field components_registry table
 ---@field systems Systems
----@field query fun(self: World, mask: number)
+---@field query fun(self: World, mask: Mask)
 
 local worldlib = {}
 
@@ -40,12 +41,12 @@ local function spawn(self, components)
 	self.last_id = new_id
 end
 ---@param self World
----@param mask number
+---@param mask Mask
 ---@return number[]
 local function query(self, mask)
 	local ids = {}
 	for id, value in pairs(self.entities) do
-		if contains(mask, value.mask) then
+		if contains(mask.with, value.mask) and dont_contain(mask.without, value.mask) then
 			table.insert(ids, id)
 		end
 	end
@@ -55,10 +56,11 @@ end
 ---@param self World
 ---@param name string
 ---@param type SysetemType
----@param components any[]
+---@param with any[]
+---@param without any[]
 ---@param fn fun(world: World, ids: number[])
-local function add_system(self, name, type, components, fn)
-	local system = new_system(components, fn, self.components_registry)
+local function add_system(self, name, type, with, without, fn)
+	local system = new_system(with, without, fn, self.components_registry)
 	print(inspect(system))
 	if type == system_type.load then
 		self.systems.load[name] = system

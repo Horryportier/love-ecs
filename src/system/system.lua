@@ -1,6 +1,6 @@
 local generate_mask = require("src.mask").generate_mask
 
----@alias System { mask: number, fn: fun(world: World, ids: number[]) }
+---@alias System { mask: Mask, fn: fun(world: World, ids: number[]) }
 ---@class Systems
 ---@field draw System[]
 ---@field update System[]
@@ -16,11 +16,18 @@ systemlib.system_type = {
 }
 
 ---comment
----@param components any[]
+---@param with any[]
+---@param without any[]
 ---@param fn fun(world: World, ids: number[])
 ---@return System
-function systemlib.new_system(components, fn, component_registry)
-	return { mask = generate_mask(components, component_registry), fn = fn }
+function systemlib.new_system(with, without, fn, component_registry)
+	return {
+		mask = {
+			with = generate_mask(with, component_registry),
+			without = generate_mask(without, component_registry),
+		},
+		fn = fn,
+	}
 end
 
 return systemlib
