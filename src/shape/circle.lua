@@ -14,13 +14,13 @@ end
 
 ---@class Circle: Shape
 ---@field radius number
----@field mode "fill"|"line"
+---@field mode love.DrawMode
 local circle = {
 	---@type fun(self, x: number, y: number)
 	---@overload fun(self, pos: { x: number, y: number})
 	draw = draw,
 
-	---@type fun(mode: "fill"|"line", radius: number): Circle
+	---@type fun(mode: love.DrawMode, radius: number): Circle
 	new = function(mode, radius)
 		return {
 			mode = mode,

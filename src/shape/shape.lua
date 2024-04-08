@@ -60,6 +60,11 @@ end
 local shapelib = {
 	circle = require("src.shape.circle"),
 	rect = require("src.shape.rect"),
+	arc = require("src.shape.arc"),
+	ellipse = require("src.shape.ellipse"),
+	line = require("src.shape.line"),
+	point = require("src.shape.point"),
+	polygon = require("src.shape.polygon"),
 	---@type fun(t: {shape: Shape?, position: {x: number, y: number}?, color: number[]?}): ShapeBundle
 	shape_bundle = function(t)
 		local sb = setmetatable({

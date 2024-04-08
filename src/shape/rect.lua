@@ -15,13 +15,13 @@ end
 ---@class Rect: Shape
 ---@field width number
 ---@field height number
----@field mode "fill"|"line"
+---@field mode love.DrawMode
 local Rect = {
 	---@type fun(self, x: number, y: number)
 	---@overload fun(self, pos: { x: number, y: number})
 	draw = draw,
 
-	---@type fun(mode: "fill"|"line", width : number, height): Rect
+	---@type fun(mode: love.DrawMode, width : number, height): Rect
 	new = function(mode, width, height)
 		return {
 			mode = mode,
