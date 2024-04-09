@@ -46,52 +46,79 @@ function love.load()
 		World:spawn(_circle).components.color = nil
 	end
 
-	World:add_system("1draw_shape", "draw", { position = true, shape = true, color = true }, function(world, ids)
-		for _, value in pairs(ids) do
-			local e = world.entities[value].components
-			local r, g, b, a = love.graphics.getColor()
-			if e.color then
-				love.graphics.setColor(unpack(e.color))
+	World:add_system({
+		name = "1draw_shape",
+		type = "draw",
+		query = { position = true, shape = true },
+		fn = function(world, ids)
+			for _, value in pairs(ids) do
+				local e = world.entities[value].components
+				local r, g, b, a = love.graphics.getColor()
+				if e.color then
+					love.graphics.setColor(unpack(e.color))
+				end
+				e.shape:draw(e.position.x, e.position.y)
+				if e.color then
+					love.graphics.setColor(r, g, b, a)
+				end
 			end
-			e.shape:draw(e.position.x, e.position.y)
-			if e.color then
-				love.graphics.setColor(r, g, b, a)
+		end,
+	})
+	World:add_system({
+		name = "move_shapes",
+		type = "update",
+		query = { shape = true, position = true, color = false },
+		fn = function(world, ids, dt)
+			for _, value in pairs(ids) do
+				local old_pos = world.entities[value].components.position
+				world.entities[value].components.position = {
+					x = old_pos.x + math.random(-10, 10) * dt,
+					y = old_pos.y + math.random(-10, 10) * dt,
+				}
 			end
-		end
-	end)
-	World:add_system("move_shapes", "update", { shape = true, position = true, color = false }, function(world, ids, dt)
-		for _, value in pairs(ids) do
-			local old_pos = world.entities[value].components.position
-			world.entities[value].components.position = {
-				x = old_pos.x + math.random(-10, 10) * dt,
-				y = old_pos.y + math.random(-10, 10) * dt,
-			}
-		end
-	end)
-	World:add_system("0print_info", "draw", {}, function(world, _)
-		love.graphics.print(tostring(love.timer.getFPS()))
-		love.graphics.print("number of entities: " .. tostring(#world.entities), 0, 20)
-		for index, value in ipairs(world.entities) do
-			love.graphics.print("number of entities: " .. tostring(value), 0, 20 + (index * 10))
-		end
-	end)
+		end,
+	})
+	World:add_system({
+		name = "0print_info",
+		type = "draw",
+		query = {},
+		fn = function(world, _)
+			love.graphics.print(tostring(love.timer.getFPS()))
+			love.graphics.print("number of entities: " .. tostring(#world.entities), 0, 20)
+			for index, value in ipairs(world.entities) do
+				love.graphics.print("number of entities: " .. tostring(value), 0, 20 + (index * 10))
+			end
+		end,
+	})
 
-	World:add_system("romove_color", "update", { color = true }, function(world, ids)
-		for _, value in pairs(ids) do
-			if love.keyboard.isDown("r") then
-				world.entities[value]:remove("color")
-				print(value)
+	World:add_system({
+		name = "romove_color",
+		type = "update",
+		query = { color = true },
+		fn = function(world, ids)
+			for _, value in pairs(ids) do
+				if love.keyboard.isDown("r") then
+					world.entities[value]:remove("color")
+					print(value)
+				end
 			end
-		end
-	end)
-	World:add_system("add_color", "update", { shape = true, color = false }, function(world, ids)
-		for _, value in pairs(ids) do
-			if love.keyboard.isDown("c") then
-				world.entities[value]:insert({ color = with_color({}).color })
-				print(value)
+		end,
+	})
+	World:add_system({
+		name = "add_color",
+		type = "update",
+		query = { shape = true, color = false },
+		fn = function(world, ids)
+			for _, value in pairs(ids) do
+				if love.keyboard.isDown("c") then
+					world.entities[value]:insert({ color = with_color({}).color })
+					print(value)
+				end
 			end
-		end
-	end)
+		end,
+	})
+	World:load()
+	print(inspect(World.systems))
 end
 
 function love.update(dt)

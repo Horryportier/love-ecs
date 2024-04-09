@@ -15,8 +15,7 @@ local system_type = require("src.system.system").system_type
 ---@field query fun(self: World, mask: Mask)
 ---@field spawn fun(self: World, components: table)
 ---@field register_types fun(self: World, list: string[])
----@field add_system fun(self: World, name: string, type: SystemType, query: table<string, boolean>, fn: fun(world: World, ids: number[]))
----@overload fun(self: World, name: string, type: SystemType, with: any[], without: any[], fn: fun(world: World, ids: number[], dt: number))
+---@field add_system fun(self: World, system : SystemBuilder)
 ---@field draw  fun(self: World)
 ---@field load fun(self: World)
 ---@field update fun(self: World, dt: number)
@@ -68,34 +67,18 @@ end
 
 --- adds system to world pass SystemType ("load"|"draw"|"update") to specify what system is it
 ---@param self World
----@param name string
----@param type SystemType
----@param query table<boolean>
----@param fn fun(world: World, ids: number[])
----@overload fun(self: World, name: string, type: SystemType, query: table<boolean>, fn: fun(world: World, ids: number[], dt: number))
-local function add_system(self, name, type, query, fn)
-	local with = {}
-	for key, value in pairs(query) do
-		if value then
-			with[key] = true
-		end
-	end
-	local without = {}
-	for key, value in pairs(query) do
-		if not value then
-			without[key] = true
-		end
-	end
+---@param system SystemBuilder
+local function add_system(self, system)
+	local system = new_system(system, self.components_registry)
 
-	local system = new_system(type, with, without, fn, self.components_registry)
-	if type == system_type.load then
-		self.systems.load[name] = system
+	if system.type == system_type.load then
+		self.systems.load[system.name] = system
 	end
-	if type == system_type.draw then
-		self.systems.draw[name] = system
+	if system.type == system_type.draw then
+		self.systems.draw[system.name] = system
 	end
-	if type == system_type.update then
-		self.systems.update[name] = system
+	if system.type == system_type.update then
+		self.systems.update[system.name] = system
 	end
 end
 
