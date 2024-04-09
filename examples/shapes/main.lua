@@ -17,7 +17,7 @@ function love.load()
 		"position",
 		"color",
 	})
-	World:add_system("spawn_shapes", "load", {}, {}, function(world, _)
+	World:add_system("spawn_shapes", "load", {}, function(world, _)
 		World:spawn(shape_bundle({ shape = circle.new("line", 50), position = { x = 100, y = 100 } }))
 		World:spawn(shape_bundle({ shape = circle.new("fill", 50), position = { x = 100, y = 200 } }))
 		World:spawn(shape_bundle({ shape = rect.new("line", 150, 80), position = { x = 200, y = 50 } }))
@@ -43,7 +43,7 @@ function love.load()
 		World:spawn(shape_bundle({ shape = polygon.new("line", { 600, 20, 300, 20, 24, 443 }) }))
 	end)
 
-	World:add_system("draw_shapes", "draw", { shape = true, position = true, color = true }, {}, render_shape_bundle)
+	World:add_system("draw_shapes", "draw", { shape = true, position = true, color = true }, render_shape_bundle)
 
 	World:load()
 end

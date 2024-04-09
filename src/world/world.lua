@@ -15,7 +15,7 @@ local system_type = require("src.system.system").system_type
 ---@field query fun(self: World, mask: Mask)
 ---@field spawn fun(self: World, components: table)
 ---@field register_types fun(self: World, list: string[])
----@field add_system fun(self: World, name: string, type: SystemType, with: any[], without: any[], fn: fun(world: World, ids: number[]))
+---@field add_system fun(self: World, name: string, type: SystemType, query: table<string, boolean>, fn: fun(world: World, ids: number[]))
 ---@overload fun(self: World, name: string, type: SystemType, with: any[], without: any[], fn: fun(world: World, ids: number[], dt: number))
 ---@field draw  fun(self: World)
 ---@field load fun(self: World)
@@ -53,7 +53,7 @@ end
 ---@param self World
 ---@param mask Mask
 ---@return number[]
-local function query(self, mask)
+local function query_ids(self, mask)
 	local ids = {}
 	for id, value in pairs(self.entities) do
 		if value.mutated then
@@ -67,16 +67,27 @@ local function query(self, mask)
 end
 
 --- adds system to world pass SystemType ("load"|"draw"|"update") to specify what system is it
---- ERROR: when with and without queries have conflicting types
 ---@param self World
 ---@param name string
 ---@param type SystemType
----@param with any[]
----@param without any[]
+---@param query table<boolean>
 ---@param fn fun(world: World, ids: number[])
----@overload fun(self: World, name: string, type: SystemType, with: any[], without: any[], fn: fun(world: World, ids: number[], dt: number))
-local function add_system(self, name, type, with, without, fn)
-	local system = new_system(with, without, fn, self.components_registry)
+---@overload fun(self: World, name: string, type: SystemType, query: table<boolean>, fn: fun(world: World, ids: number[], dt: number))
+local function add_system(self, name, type, query, fn)
+	local with = {}
+	for key, value in pairs(query) do
+		if value then
+			with[key] = true
+		end
+	end
+	local without = {}
+	for key, value in pairs(query) do
+		if not value then
+			without[key] = true
+		end
+	end
+
+	local system = new_system(type, with, without, fn, self.components_registry)
 	if type == system_type.load then
 		self.systems.load[name] = system
 	end
@@ -90,20 +101,20 @@ end
 
 local function draw(self)
 	for _, system in pairs(self.systems.draw) do
-		local ids = self:query(system.mask)
+		local ids = self:query_ids(system.mask)
 		system.fn(self, ids)
 	end
 end
 local function update(self, dt)
 	for _, system in pairs(self.systems.update) do
-		local ids = self:query(system.mask)
+		local ids = self:query_ids(system.mask)
 		system.fn(self, ids, dt)
 	end
 end
 
 local function load(self)
 	for _, system in pairs(self.systems.load) do
-		local ids = self:query(system.mask)
+		local ids = self:query_ids(system.mask)
 		system.fn(self, ids)
 	end
 end
@@ -114,7 +125,7 @@ local world_functions = {
 	load = load,
 	draw = draw,
 	spawn = spawn,
-	query = query,
+	query_ids = query_ids,
 	add_system = add_system,
 }
 

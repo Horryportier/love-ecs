@@ -17,7 +17,7 @@ function love.load()
 	-- adding system to draw loop
 	-- this system will run in draw loop
 	-- NOTE: if you happend to specify conflicting mask for `with` and `without` code will errror
-	World:add_system("draw_shape", "draw", { shape = true, position = true, color = true }, {}, function(world, ids)
+	World:add_system("draw_shape", "draw", { shape = true, position = true, color = true }, function(world, ids)
 		for _, value in pairs(ids) do
 			local e = world.entities[value].components
 			local r, g, b, a = love.graphics.getColor()
@@ -29,7 +29,7 @@ function love.load()
 
 	-- adding system to load group
 	-- this system will run on load
-	World:add_system("spawn_circle", "load", {}, {}, function(world, _)
+	World:add_system("spawn_circle", "load", {}, function(world, _)
 		world:spawn({
 			position = { x = 200, y = 200 },
 			shape = {
